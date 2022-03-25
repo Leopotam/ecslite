@@ -294,7 +294,7 @@ class EcsStartup {
 * [UniLeo - Unity scene data converter](https://github.com/voody2506/UniLeo-Lite)
 * [Unity Physx events support](https://github.com/supremestranger/leoecs-lite-physics)
 * [Multiple Shared injection](https://github.com/GoodCatGames/ecslite-multiple-shared)
-* [Unity native collections support](https://github.com/odingamesdev/native-ecslite)
+* [EasyEvents](https://github.com/7Bpencil/ecslite-easyevents)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
