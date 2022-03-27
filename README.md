@@ -290,7 +290,6 @@ class EcsStartup {
 * [Поддержка многопоточности](https://github.com/Leopotam/ecslite-threads)
 * [Интеграция в редактор Unity](https://github.com/Leopotam/ecslite-unityeditor)
 * [Поддержка Unity uGui](https://github.com/Leopotam/ecslite-unity-ugui)
-* [Поддержка Unity jobs](https://github.com/Leopotam/ecslite-threads-unity)
 * [UniLeo - Unity scene data converter](https://github.com/voody2506/UniLeo-Lite)
 * [Unity Physx events support](https://github.com/supremestranger/leoecs-lite-physics)
 * [Multiple Shared injection](https://github.com/GoodCatGames/ecslite-multiple-shared)
