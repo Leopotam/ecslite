@@ -23,6 +23,7 @@
 * [Интеграция с движками](#Интеграция-с-движками)
     * [Unity](#Unity)
     * [Кастомный движок](#Кастомный-движок)
+* [Статьи](#Статьи)
 * [Проекты, использующие LeoECS Lite](#Проекты,-использующие-LeoECS-Lite)
     * [С исходниками](#С-исходниками)
 * [Расширения](#Расширения)
@@ -273,6 +274,11 @@ class EcsStartup {
     }
 }
 ```
+
+# Статьи
+
+* ["Создание dungeon crawler'а с LeoECS Lite. Часть 1"](https://habr.com/ru/post/661085/)
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/372/b1c/ad3/372b1cad308788dac56f8db1ea16b9c9.png)](https://habr.com/ru/post/661085/)
 
 # Проекты, использующие LeoECS Lite
 ## С исходниками
