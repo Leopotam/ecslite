@@ -279,6 +279,8 @@ class EcsStartup {
 
 * ["Создание dungeon crawler'а с LeoECS Lite. Часть 1"](https://habr.com/ru/post/661085/)
   [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/372/b1c/ad3/372b1cad308788dac56f8db1ea16b9c9.png)](https://habr.com/ru/post/661085/)
+* ["Всё что нужно знать про ECS"](https://habr.com/ru/post/665276/)
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/3fd/5bc/544/3fd5bc5442b03a20d52a8003576056d4.png)](https://habr.com/ru/post/665276/)
 
 # Проекты, использующие LeoECS Lite
 ## С исходниками
@@ -300,6 +302,7 @@ class EcsStartup {
 * [Unity Physx events support](https://github.com/supremestranger/leoecs-lite-physics)
 * [Multiple Shared injection](https://github.com/GoodCatGames/ecslite-multiple-shared)
 * [EasyEvents](https://github.com/7Bpencil/ecslite-easyevents)
+* [Entity command buffer](https://github.com/JimboA/EcsLiteEntityCommandBuffer)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
