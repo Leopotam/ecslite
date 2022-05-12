@@ -2,7 +2,7 @@
     "name": "com.leopotam.ecslite",
     "author": "Leopotam",
     "displayName": "LeoECS Lite",
-    "description": "LeoECS Lite - легковесный ECS-фреймворк, основанный на структурах. Производительность, нулевые или минимальные аллокации, минимизация использования памяти, отсутствие зависимостей от любого игрового движка - это основные цели данного фреймворка.",
+    "description": "LeoECS Lite is lightweight C# Entity Component System framework based on structs. Performance, zero/small memory allocations/footprint, no dependency on fucking Unity engine - main goals of this project.",
     "unity": "2020.3",
     "version": "2022.5.22-preview",
     "keywords": [
