@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using Unity.IL2CPP.CompilerServices;
 #endif
 
-namespace Leopotam.EcsLite {
+namespace EcsKit {
     public struct EcsPackedEntity {
         internal int Id;
         internal int Gen;

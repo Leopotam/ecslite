@@ -10,7 +10,9 @@ using System.Runtime.CompilerServices;
 using Unity.IL2CPP.CompilerServices;
 #endif
 
-namespace Leopotam.EcsLite {
+namespace EcsKit {
+    public interface IComponent { }
+
     public interface IEcsPool {
         void Resize (int capacity);
         bool Has (int entity);
@@ -22,7 +24,7 @@ namespace Leopotam.EcsLite {
         Type GetComponentType ();
     }
 
-    public interface IEcsAutoReset<T> where T : struct {
+    public interface IEcsAutoReset<T> where T : struct, IComponent {
         void AutoReset (ref T c);
     }
 
@@ -30,7 +32,7 @@ namespace Leopotam.EcsLite {
     [Il2CppSetOption (Option.NullChecks, false)]
     [Il2CppSetOption (Option.ArrayBoundsChecks, false)]
 #endif
-    public sealed class EcsPool<T> : IEcsPool where T : struct {
+    public sealed class EcsPool<T> : IEcsPool where T : struct, IComponent {
         readonly Type _type;
         readonly EcsWorld _world;
         readonly int _id;

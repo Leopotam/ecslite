@@ -11,12 +11,12 @@ using System.Runtime.CompilerServices;
 using Unity.IL2CPP.CompilerServices;
 #endif
 
-namespace Leopotam.EcsLite {
+namespace EcsKit {
 #if ENABLE_IL2CPP
     [Il2CppSetOption (Option.NullChecks, false)]
     [Il2CppSetOption (Option.ArrayBoundsChecks, false)]
 #endif
-    public class EcsWorld {
+    public sealed class EcsWorld {
         internal EntityData[] Entities;
         int _entitiesCount;
         int[] _recycledEntities;
@@ -34,6 +34,8 @@ namespace Leopotam.EcsLite {
         int _masksCount;
 
         bool _destroyed;
+        int _lastUniqueID;
+
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
         List<IEcsWorldEventListener> _eventListeners;
 
@@ -55,22 +57,6 @@ namespace Leopotam.EcsLite {
             for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
                 _eventListeners[ii].OnEntityChanged (entity);
             }
-        }
-#endif
-#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-        readonly List<int> _leakedEntities = new List<int> (512);
-
-        internal bool CheckForLeakedEntities () {
-            if (_leakedEntities.Count > 0) {
-                for (int i = 0, iMax = _leakedEntities.Count; i < iMax; i++) {
-                    ref var entityData = ref Entities[_leakedEntities[i]];
-                    if (entityData.Gen > 0 && entityData.ComponentsCount == 0) {
-                        return true;
-                    }
-                }
-                _leakedEntities.Clear ();
-            }
-            return false;
         }
 #endif
 
@@ -105,10 +91,8 @@ namespace Leopotam.EcsLite {
         }
 
         public void Destroy () {
-#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-            if (CheckForLeakedEntities ()) { throw new Exception ($"Empty entity detected before EcsWorld.Destroy()."); }
-#endif
             _destroyed = true;
+            _lastUniqueID = 0;
             for (var i = _entitiesCount - 1; i >= 0; i--) {
                 ref var entityData = ref Entities[i];
                 if (entityData.ComponentsCount > 0) {
@@ -134,11 +118,14 @@ namespace Leopotam.EcsLite {
         }
 
         public int NewEntity () {
+            _lastUniqueID++;
+
             int entity;
             if (_recycledEntitiesCount > 0) {
                 entity = _recycledEntities[--_recycledEntitiesCount];
                 ref var entityData = ref Entities[entity];
                 entityData.Gen = (short) -entityData.Gen;
+                entityData.UniqueID = _lastUniqueID;
             } else {
                 // new entity.
                 if (_entitiesCount == Entities.Length) {
@@ -158,11 +145,10 @@ namespace Leopotam.EcsLite {
 #endif
                 }
                 entity = _entitiesCount++;
-                Entities[entity].Gen = 1;
+                ref var entityData = ref Entities[entity];
+                entityData.Gen = 1;
+                entityData.UniqueID = _lastUniqueID;
             }
-#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-            _leakedEntities.Add (entity);
-#endif
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
             for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
                 _eventListeners[ii].OnEntityCreated (entity);
@@ -196,6 +182,7 @@ namespace Leopotam.EcsLite {
                 return;
             }
             entityData.Gen = (short) (entityData.Gen == short.MaxValue ? -1 : -(entityData.Gen + 1));
+            entityData.UniqueID = -entityData.UniqueID;
             if (_recycledEntitiesCount == _recycledEntities.Length) {
                 Array.Resize (ref _recycledEntities, _recycledEntitiesCount << 1);
             }
@@ -215,6 +202,11 @@ namespace Leopotam.EcsLite {
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public short GetEntityGen (int entity) {
             return Entities[entity].Gen;
+        }
+
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        public int GetEntityUniqueID (int entity) {
+            return Entities[entity].UniqueID;
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
@@ -238,11 +230,11 @@ namespace Leopotam.EcsLite {
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public EntityData[] GetRawEntities () {
+        internal EntityData[] GetRawEntities () {
             return Entities;
         }
 
-        public EcsPool<T> GetPool<T> () where T : struct {
+        public EcsPool<T> GetPool<T> () where T : struct, IComponent {
             var poolType = typeof (T);
             if (_poolHashes.TryGetValue (poolType, out var rawPool)) {
                 return (EcsPool<T>) rawPool;
@@ -295,7 +287,7 @@ namespace Leopotam.EcsLite {
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public Mask Filter<T> () where T : struct {
+        public Mask Filter<T> () where T : struct, IComponent {
             var mask = _masksCount > 0 ? _masks[--_masksCount] : new Mask (this);
             return mask.Inc<T> ();
         }
@@ -372,7 +364,7 @@ namespace Leopotam.EcsLite {
             return (filter, true);
         }
 
-        public void OnEntityChangeInternal (int entity, int componentType, bool added) {
+        internal void OnEntityChangeInternal (int entity, int componentType, bool added) {
             var includeList = _filtersByIncludedComponents[componentType];
             var excludeList = _filtersByExcludedComponents[componentType];
             if (added) {
@@ -503,7 +495,7 @@ namespace Leopotam.EcsLite {
             }
 
             [MethodImpl (MethodImplOptions.AggressiveInlining)]
-            public Mask Inc<T> () where T : struct {
+            public Mask Inc<T> () where T : struct, IComponent {
                 var poolId = _world.GetPool<T> ().GetId ();
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
                 if (_built) { throw new Exception ("Cant change built mask."); }
@@ -519,7 +511,7 @@ namespace Leopotam.EcsLite {
             [UnityEngine.Scripting.Preserve]
 #endif
             [MethodImpl (MethodImplOptions.AggressiveInlining)]
-            public Mask Exc<T> () where T : struct {
+            public Mask Exc<T> () where T : struct, IComponent {
                 var poolId = _world.GetPool<T> ().GetId ();
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
                 if (_built) { throw new Exception ("Cant change built mask."); }
@@ -562,9 +554,10 @@ namespace Leopotam.EcsLite {
             }
         }
 
-        public struct EntityData {
+        internal struct EntityData {
             public short Gen;
             public short ComponentsCount;
+            public int UniqueID;
         }
     }
 
