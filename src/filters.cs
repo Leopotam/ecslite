@@ -108,6 +108,9 @@ namespace EcsKit {
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         internal void AddEntity (int entity) {
             if (AddDelayedOp (true, entity)) { return; }
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (SparseEntities[entity] > 0) { throw new Exception("Entity already in filter."); }
+#endif
             if (_entitiesCount == _denseEntities.Length) {
                 Array.Resize (ref _denseEntities, _entitiesCount << 1);
             }
@@ -121,6 +124,9 @@ namespace EcsKit {
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         internal void RemoveEntity (int entity) {
             if (AddDelayedOp (false, entity)) { return; }
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (SparseEntities[entity] == 0) { throw new Exception("Entity not in filter."); }
+#endif
             var idx = SparseEntities[entity] - 1;
             SparseEntities[entity] = 0;
             _entitiesCount--;
