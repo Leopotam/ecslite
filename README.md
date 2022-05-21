@@ -292,6 +292,10 @@ class EcsStartup {
   [![](https://github.com/7Bpencil/sharpPhysics/raw/master/pictures/preview.png)](https://github.com/7Bpencil/sharpPhysics)
 
 
+* ["YourVostok"](https://github.com/7Bpencil/YourVostok)
+  [![](https://github.com/7Bpencil/YourVostok/raw/master/Previews/preview.gif)](https://github.com/7Bpencil/YourVostok)
+
+
 # Расширения
 * [Инъекция зависимостей](https://github.com/Leopotam/ecslite-di)
 * [Расширенные системы](https://github.com/Leopotam/ecslite-extendedsystems)
