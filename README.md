@@ -23,6 +23,7 @@
 * [Интеграция с движками](#Интеграция-с-движками)
     * [Unity](#Unity)
     * [Кастомный движок](#Кастомный-движок)
+* [Статьи](#Статьи)
 * [Проекты, использующие LeoECS Lite](#Проекты,-использующие-LeoECS-Lite)
     * [С исходниками](#С-исходниками)
 * [Расширения](#Расширения)
@@ -274,14 +275,28 @@ class EcsStartup {
 }
 ```
 
+# Статьи
+
+* ["Создание dungeon crawler'а с LeoECS Lite. Часть 1"](https://habr.com/ru/post/661085/)
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/372/b1c/ad3/372b1cad308788dac56f8db1ea16b9c9.png)](https://habr.com/ru/post/661085/)
+* ["Всё что нужно знать про ECS"](https://habr.com/ru/post/665276/)
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/3fd/5bc/544/3fd5bc5442b03a20d52a8003576056d4.png)](https://habr.com/ru/post/665276/)
+
 # Проекты, использующие LeoECS Lite
 ## С исходниками
 * ["3D Platformer"](https://github.com/supremestranger/3D-Platformer-Lite)
+
   [![](https://camo.githubusercontent.com/dcd2f525130d73f4688c1f1cfb12f6e37d166dae23a1c6fac70e5b7873c3ab21/68747470733a2f2f692e6962622e636f2f686d374c726d342f506c6174666f726d65722e706e67)](https://github.com/supremestranger/3D-Platformer-Lite)
 
 
 * ["SharpPhysics2D"](https://github.com/7Bpencil/sharpPhysics)
+
   [![](https://github.com/7Bpencil/sharpPhysics/raw/master/pictures/preview.png)](https://github.com/7Bpencil/sharpPhysics)
+
+
+* ["YourVostok"](https://github.com/7Bpencil/YourVostok)
+
+  [![](https://github.com/7Bpencil/YourVostok/raw/master/Previews/preview.gif)](https://github.com/7Bpencil/YourVostok)
 
 
 # Расширения
@@ -294,6 +309,7 @@ class EcsStartup {
 * [Unity Physx events support](https://github.com/supremestranger/leoecs-lite-physics)
 * [Multiple Shared injection](https://github.com/GoodCatGames/ecslite-multiple-shared)
 * [EasyEvents](https://github.com/7Bpencil/ecslite-easyevents)
+* [Entity command buffer](https://github.com/JimboA/EcsLiteEntityCommandBuffer)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
