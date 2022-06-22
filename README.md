@@ -131,6 +131,9 @@ EcsPool<Component1> pool = world.GetPool<Component1> ();
 // Add() добавляет компонент к сущности. Если компонент уже существует - будет брошено исключение в DEBUG-версии.
 ref Component1 c1 = ref pool.Add (entity);
 
+// Has() проверяет наличие компонента на сущности.
+bool c1Exists = pool.Has (entity);
+
 // Get() возвращает существующий на сущности компонент. Если компонент не существует - будет брошено исключение в DEBUG-версии.
 ref Component1 c1 = ref pool.Get (entity);
 
