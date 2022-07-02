@@ -77,6 +77,7 @@ namespace Leopotam.EcsLite {
             if (_inited) { throw new System.Exception ("World cant be added after Init() call."); }
 #endif
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (world == null) { throw new System.Exception ("World cant be null."); }
             if (string.IsNullOrEmpty (name)) { throw new System.Exception ("World name cant be null or empty."); }
 #endif
             _namedWorlds[name] = world;
@@ -92,6 +93,7 @@ namespace Leopotam.EcsLite {
         public IEcsLogics Add (IEcsLogic logic) {
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
             if (_inited) { throw new System.Exception ("Logic cant be added after Init() call."); }
+            if (logic == null) { throw new System.Exception ("World cant be null."); }
 #endif
             _allLogics.Add (logic);
             if (logic is IEcsRunLogic run) {
@@ -134,6 +136,9 @@ namespace Leopotam.EcsLite {
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public void Run () {
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (!_inited) { throw new System.Exception ("Should be initialized before."); }
+#endif
             for (int i = 0, iMax = _runLogics.Count; i < iMax; i++) {
                 _runLogics[i].Run ();
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
