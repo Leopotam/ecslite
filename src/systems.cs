@@ -13,23 +13,23 @@ namespace Leopotam.EcsLite {
     public interface IEcsSystem { }
 
     public interface IEcsPreInitSystem : IEcsSystem {
-        void PreInit (EcsSystems systems);
+        void PreInit (IEcsSystems systems);
     }
 
     public interface IEcsInitSystem : IEcsSystem {
-        void Init (EcsSystems systems);
+        void Init (IEcsSystems systems);
     }
 
     public interface IEcsRunSystem : IEcsSystem {
-        void Run (EcsSystems systems);
+        void Run (IEcsSystems systems);
     }
 
     public interface IEcsDestroySystem : IEcsSystem {
-        void Destroy (EcsSystems systems);
+        void Destroy (IEcsSystems systems);
     }
 
     public interface IEcsPostDestroySystem : IEcsSystem {
-        void PostDestroy (EcsSystems systems);
+        void PostDestroy (IEcsSystems systems);
     }
 
     public interface IEcsSystems {
@@ -104,38 +104,8 @@ namespace Leopotam.EcsLite {
             return this;
         }
 
-#if DEBUG
-        [System.Obsolete ("Use IReadOnlyList<IEcsSystem> GetAllSystems() instead.")]
-#endif
-        public int GetAllSystems (ref IEcsSystem[] list) {
-            var itemsCount = _allSystems.Count;
-            if (itemsCount == 0) { return 0; }
-            if (list == null || list.Length < itemsCount) {
-                list = new IEcsSystem[_allSystems.Capacity];
-            }
-            for (int i = 0, iMax = itemsCount; i < iMax; i++) {
-                list[i] = _allSystems[i];
-            }
-            return itemsCount;
-        }
-
         public virtual IReadOnlyList<IEcsSystem> GetAllSystems () {
             return _allSystems;
-        }
-
-#if DEBUG
-        [System.Obsolete ("Use GetAllSystems() and filter manually.")]
-#endif
-        public int GetRunSystems (ref IEcsRunSystem[] list) {
-            var itemsCount = _runSystems.Count;
-            if (itemsCount == 0) { return 0; }
-            if (list == null || list.Length < itemsCount) {
-                list = new IEcsRunSystem[_runSystems.Count];
-            }
-            for (int i = 0, iMax = itemsCount; i < iMax; i++) {
-                list[i] = _runSystems[i];
-            }
-            return itemsCount;
         }
 
         public virtual void Init () {

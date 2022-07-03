@@ -76,24 +76,24 @@ struct Component1 {
 Является контейнером для основной логики для обработки отфильтрованных сущностей. Существует в виде пользовательского класса, реализующего как минимум один из `IEcsInitSystem`, `IEcsDestroySystem`, `IEcsRunSystem` (и прочих поддерживаемых) интерфейсов:
 ```c#
 class UserSystem : IEcsPreInitSystem, IEcsInitSystem, IEcsRunSystem, IEcsDestroySystem, IEcsPostDestroySystem {
-    public void PreInit (EcsSystems systems) {
-        // Будет вызван один раз в момент работы EcsSystems.Init() и до срабатывания IEcsInitSystem.Init().
+    public void PreInit (IEcsSystems systems) {
+        // Будет вызван один раз в момент работы IEcsSystems.Init() и до срабатывания IEcsInitSystem.Init().
     }
     
-    public void Init (EcsSystems systems) {
-        // Будет вызван один раз в момент работы EcsSystems.Init() и после срабатывания IEcsPreInitSystem.PreInit().
+    public void Init (IEcsSystems systems) {
+        // Будет вызван один раз в момент работы IEcsSystems.Init() и после срабатывания IEcsPreInitSystem.PreInit().
     }
     
-    public void Run (EcsSystems systems) {
-        // Будет вызван один раз в момент работы EcsSystems.Run().
+    public void Run (IEcsSystems systems) {
+        // Будет вызван один раз в момент работы IEcsSystems.Run().
     }
 
-    public void Destroy (EcsSystems systems) {
-        // Будет вызван один раз в момент работы EcsSystems.Destroy() и до срабатывания IEcsPostDestroySystem.PostDestroy().
+    public void Destroy (IEcsSystems systems) {
+        // Будет вызван один раз в момент работы IEcsSystems.Destroy() и до срабатывания IEcsPostDestroySystem.PostDestroy().
     }
     
-    public void PostDestroy (EcsSystems systems) {
-        // Будет вызван один раз в момент работы EcsSystems.Destroy() и после срабатывания IEcsDestroySystem.Destroy().
+    public void PostDestroy (IEcsSystems systems) {
+        // Будет вызван один раз в момент работы IEcsSystems.Destroy() и после срабатывания IEcsDestroySystem.Destroy().
     }
 }
 ```
@@ -106,13 +106,13 @@ class SharedData {
 }
 ...
 SharedData sharedData = new SharedData { PrefabsPath = "Items/{0}" };
-EcsSystems systems = new EcsSystems (world, sharedData);
+IEcsSystems systems = new EcsSystems (world, sharedData);
 systems
     .Add (new TestSystem1 ())
     .Init ();
 ...
 class TestSystem1 : IEcsInitSystem {
-    public void Init(EcsSystems systems) {
+    public void Init(IEcsSystems systems) {
         SharedData shared = systems.GetShared<SharedData> (); 
         string prefabPath = string.Format (shared.PrefabsPath, 123);
         // prefabPath = "Items/123" к этому моменту.
@@ -147,7 +147,7 @@ pool.Del (entity);
 Является контейнером для хранения отфильтрованных сущностей по наличию или отсутствию определенных компонентов:
 ```c#
 class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
-    public void Init (EcsSystems systems) {
+    public void Init (IEcsSystems systems) {
         // Получаем экземпляр мира по умолчанию.
         EcsWorld world = systems.GetWorld ();
         
@@ -159,7 +159,7 @@ class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
         weapons.Add (entity);
     }
 
-    public void Run (EcsSystems systems) {
+    public void Run (IEcsSystems systems) {
         EcsWorld world = systems.GetWorld ();
         // Мы хотим получить все сущности с компонентом "Weapon" и без компонента "Health".
         // Фильтр может собираться динамически каждый раз, а может быть закеширован где-то.
@@ -191,7 +191,7 @@ class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
 ```c#
 class Startup : MonoBehaviour {
     EcsWorld _world;
-    EcsSystems _systems;
+    IEcsSystems _systems;
 
     void Start () {
         // Создаем окружение, подключаем системы.
@@ -222,7 +222,7 @@ class Startup : MonoBehaviour {
 }
 ```
 
-> **ВАЖНО!** Необходимо вызывать `EcsSystems.Destroy()` у экземпляра группы систем если он больше не нужен.
+> **ВАЖНО!** Необходимо вызывать `IEcsSystems.Destroy()` у экземпляра группы систем если он больше не нужен.
 
 # Интеграция с движками
 
@@ -240,7 +240,7 @@ using Leopotam.EcsLite;
 
 class EcsStartup {
     EcsWorld _world;
-    EcsSystems _systems;
+    IEcsSystems _systems;
 
     // Инициализация окружения.
     void Init () {        
@@ -343,10 +343,10 @@ class EcsStartup {
 
 ### Я хочу одну систему вызвать в `MonoBehaviour.Update()`, а другую - в `MonoBehaviour.FixedUpdate()`. Как я могу это сделать?
 
-Для разделения систем на основе разных методов из `MonoBehaviour` необходимо создать под каждый метод отдельную `EcsSystems`-группу:
+Для разделения систем на основе разных методов из `MonoBehaviour` необходимо создать под каждый метод отдельную `IEcsSystems`-группу:
 ```c#
-EcsSystems _update;
-EcsSystems _fixedUpdate;
+IEcsSystems _update;
+IEcsSystems _fixedUpdate;
 
 void Start () {
     EcsWorld world = new EcsWorld ();
