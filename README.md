@@ -196,9 +196,10 @@ class Startup : MonoBehaviour {
     void Start () {
         // Создаем окружение, подключаем системы.
         _world = new EcsWorld ();
-        _systems = new EcsSystems (_world)
-            .Add (new WeaponSystem ());
-        _systems.Init ();
+        _systems = new EcsSystems (_world);
+        _systems
+            .Add (new WeaponSystem ())
+            .Init ();
     }
     
     void Update () {
@@ -349,18 +350,22 @@ EcsSystems _fixedUpdate;
 
 void Start () {
     EcsWorld world = new EcsWorld ();
-    _update = new EcsSystems (world).Add (new UpdateSystem ());
-    _update.Init ();
-    _fixedUpdate = new EcsSystems (world).Add (new FixedUpdateSystem ());
-    _fixedUpdate.Init ();
+    _update = new EcsSystems (world);
+    _update
+        .Add (new UpdateSystem ())
+        .Init ();
+    _fixedUpdate = new EcsSystems (world);
+    _fixedUpdate
+        .Add (new FixedUpdateSystem ())
+        .Init ();
 }
 
 void Update () {
-    _update.Run ();
+    _update?.Run ();
 }
 
 void FixedUpdate () {
-    _fixedUpdate.Run ();
+    _fixedUpdate?.Run ();
 }
 ```
 
