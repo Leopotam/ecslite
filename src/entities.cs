@@ -34,7 +34,7 @@ namespace Leopotam.EcsLite {
         internal int DebugComponentsCount {
             get {
                 if (World != null && World.IsAlive () && World.IsEntityAliveInternal (Id) && World.GetEntityGen (Id) == Gen) {
-                    return World.GetComponentsCount (Id);
+                    return World.GetEntityComponentsCount (Id);
                 }
                 return 0;
             }
