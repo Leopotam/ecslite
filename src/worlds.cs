@@ -272,7 +272,7 @@ namespace Leopotam.EcsLite {
                 return (EcsPool<T>) rawPool;
             }
 #if DEBUG
-            if (_poolsCount == short.MaxValue) { throw new Exception ("Mo more room for new component into this world."); }
+            if (_poolsCount == short.MaxValue) { throw new Exception ("No more room for new component into this world."); }
 #endif
             var pool = new EcsPool<T> (this, _poolsCount, _poolDenseSize, GetWorldSize (), _poolRecycledSize);
             _poolHashes[poolType] = pool;
@@ -334,8 +334,8 @@ namespace Leopotam.EcsLite {
                 list = new object[_pools.Length];
             }
             var dataOffset = entityOffset + RawEntityOffsets.Components;
-            for (int i = 0, j = 0; i < itemsCount; i++) {
-                list[j++] = _pools[_entities[dataOffset + i]].GetRaw (entity);
+            for (var i = 0; i < itemsCount; i++) {
+                list[i] = _pools[_entities[dataOffset + i]].GetRaw (entity);
             }
             return itemsCount;
         }
@@ -348,8 +348,8 @@ namespace Leopotam.EcsLite {
                 list = new Type[_pools.Length];
             }
             var dataOffset = entityOffset + RawEntityOffsets.Components;
-            for (int i = 0, j = 0; i < itemsCount; i++) {
-                list[j++] = _pools[_entities[dataOffset + i]].GetComponentType ();
+            for (var i = 0; i < itemsCount; i++) {
+                list[i] = _pools[_entities[dataOffset + i]].GetComponentType ();
             }
             return itemsCount;
         }
