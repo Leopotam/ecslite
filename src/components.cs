@@ -33,7 +33,7 @@ namespace Leopotam.EcsLite {
     public sealed class EcsPool<T> : IEcsPool where T : struct {
         readonly Type _type;
         readonly EcsWorld _world;
-        readonly int _id;
+        readonly short _id;
         readonly AutoResetHandler _autoReset;
         // 1-based index.
         T[] _denseItems;
@@ -45,7 +45,7 @@ namespace Leopotam.EcsLite {
         T _autoresetFakeInstance;
 #endif
 
-        internal EcsPool (EcsWorld world, int id, int denseCapacity, int sparseCapacity, int recycledCapacity) {
+        internal EcsPool (EcsWorld world, short id, int denseCapacity, int sparseCapacity, int recycledCapacity) {
             _type = typeof (T);
             _world = world;
             _id = id;
@@ -164,7 +164,7 @@ namespace Leopotam.EcsLite {
             }
             _sparseItems[entity] = idx;
             _world.OnEntityChangeInternal (entity, _id, true);
-            _world.Entities[entity].ComponentsCount++;
+            _world.AddComponentToRawEntityInternal (entity, _id);
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
             _world.RaiseEntityChangeEvent (entity);
 #endif
@@ -205,12 +205,11 @@ namespace Leopotam.EcsLite {
                     _denseItems[sparseData] = default;
                 }
                 sparseData = 0;
-                ref var entityData = ref _world.Entities[entity];
-                entityData.ComponentsCount--;
+                var componentsCount = _world.RemoveComponentFromRawEntityInternal (entity, _id);
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
                 _world.RaiseEntityChangeEvent (entity);
 #endif
-                if (entityData.ComponentsCount == 0) {
+                if (componentsCount == 0) {
                     _world.DelEntity (entity);
                 }
             }

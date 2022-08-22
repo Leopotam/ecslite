@@ -36,9 +36,9 @@ namespace Leopotam.EcsLite {
         T GetShared<T> () where T : class;
         IEcsSystems AddWorld (EcsWorld world, string name);
         EcsWorld GetWorld (string name = null);
-        IReadOnlyDictionary<string, EcsWorld> GetAllNamedWorlds ();
+        Dictionary<string, EcsWorld> GetAllNamedWorlds ();
         IEcsSystems Add (IEcsSystem system);
-        IReadOnlyList<IEcsSystem> GetAllSystems ();
+        List<IEcsSystem> GetAllSystems ();
         void Init ();
         void Run ();
         void Destroy ();
@@ -89,7 +89,7 @@ namespace Leopotam.EcsLite {
             return world;
         }
 
-        public virtual IReadOnlyDictionary<string, EcsWorld> GetAllNamedWorlds () {
+        public virtual Dictionary<string, EcsWorld> GetAllNamedWorlds () {
             return _worlds;
         }
 
@@ -104,7 +104,7 @@ namespace Leopotam.EcsLite {
             return this;
         }
 
-        public virtual IReadOnlyList<IEcsSystem> GetAllSystems () {
+        public virtual List<IEcsSystem> GetAllSystems () {
             return _allSystems;
         }
 

@@ -12,17 +12,25 @@ using Unity.IL2CPP.CompilerServices;
 #endif
 
 namespace Leopotam.EcsLite {
+    public static class RawEntityOffsets {
+        public const int ComponentsCount = 0;
+        public const int Gen = 1;
+        public const int Components = 2;
+    }
+
 #if ENABLE_IL2CPP
     [Il2CppSetOption (Option.NullChecks, false)]
     [Il2CppSetOption (Option.ArrayBoundsChecks, false)]
 #endif
     public class EcsWorld {
-        internal EntityData[] Entities;
+        // componentsCount, gen, c1, c2, ..., [next]
+        short[] _entities;
+        int _entitiesItemSize;
         int _entitiesCount;
         int[] _recycledEntities;
         int _recycledEntitiesCount;
         IEcsPool[] _pools;
-        int _poolsCount;
+        short _poolsCount;
         readonly int _poolDenseSize;
         readonly int _poolRecycledSize;
         readonly Dictionary<Type, IEcsPool> _poolHashes;
@@ -63,8 +71,8 @@ namespace Leopotam.EcsLite {
         internal bool CheckForLeakedEntities () {
             if (_leakedEntities.Count > 0) {
                 for (int i = 0, iMax = _leakedEntities.Count; i < iMax; i++) {
-                    ref var entityData = ref Entities[_leakedEntities[i]];
-                    if (entityData.Gen > 0 && entityData.ComponentsCount == 0) {
+                    var entityData = GetRawEntityOffset (_leakedEntities[i]);
+                    if (_entities[entityData + RawEntityOffsets.Gen] > 0 && _entities[entityData + RawEntityOffsets.ComponentsCount] == 0) {
                         return true;
                     }
                 }
@@ -73,11 +81,11 @@ namespace Leopotam.EcsLite {
             return false;
         }
 #endif
-
         public EcsWorld (in Config cfg = default) {
             // entities.
             var capacity = cfg.Entities > 0 ? cfg.Entities : Config.EntitiesDefault;
-            Entities = new EntityData[capacity];
+            _entitiesItemSize = RawEntityOffsets.Components + (cfg.EntityComponentsSize > 0 ? cfg.EntityComponentsSize : Config.EntityComponentsSizeDefault);
+            _entities = new short[capacity * _entitiesItemSize];
             capacity = cfg.RecycledEntities > 0 ? cfg.RecycledEntities : Config.RecycledEntitiesDefault;
             _recycledEntities = new int[capacity];
             _entitiesCount = 0;
@@ -110,8 +118,7 @@ namespace Leopotam.EcsLite {
 #endif
             _destroyed = true;
             for (var i = _entitiesCount - 1; i >= 0; i--) {
-                ref var entityData = ref Entities[i];
-                if (entityData.ComponentsCount > 0) {
+                if (_entities[GetRawEntityOffset (i) + RawEntityOffsets.ComponentsCount] > 0) {
                     DelEntity (i);
                 }
             }
@@ -129,6 +136,11 @@ namespace Leopotam.EcsLite {
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        public int GetRawEntityOffset (int entity) {
+            return entity * _entitiesItemSize;
+        }
+
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public bool IsAlive () {
             return !_destroyed;
         }
@@ -137,14 +149,13 @@ namespace Leopotam.EcsLite {
             int entity;
             if (_recycledEntitiesCount > 0) {
                 entity = _recycledEntities[--_recycledEntitiesCount];
-                ref var entityData = ref Entities[entity];
-                entityData.Gen = (short) -entityData.Gen;
+                _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen] *= -1;
             } else {
                 // new entity.
-                if (_entitiesCount == Entities.Length) {
+                if (_entitiesCount * _entitiesItemSize == _entities.Length) {
                     // resize entities and component pools.
                     var newSize = _entitiesCount << 1;
-                    Array.Resize (ref Entities, newSize);
+                    Array.Resize (ref _entities, newSize * _entitiesItemSize);
                     for (int i = 0, iMax = _poolsCount; i < iMax; i++) {
                         _pools[i].Resize (newSize);
                     }
@@ -158,7 +169,7 @@ namespace Leopotam.EcsLite {
 #endif
                 }
                 entity = _entitiesCount++;
-                Entities[entity].Gen = 1;
+                _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen] = 1;
             }
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
             _leakedEntities.Add (entity);
@@ -175,56 +186,69 @@ namespace Leopotam.EcsLite {
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
             if (entity < 0 || entity >= _entitiesCount) { throw new Exception ("Cant touch destroyed entity."); }
 #endif
-            ref var entityData = ref Entities[entity];
-            if (entityData.Gen < 0) {
+            var entityOffset = GetRawEntityOffset (entity);
+            var componentsCount = _entities[entityOffset + RawEntityOffsets.ComponentsCount];
+            ref var entityGen = ref _entities[entityOffset + RawEntityOffsets.Gen];
+            if (entityGen < 0) {
                 return;
             }
-            // kill components.
-            if (entityData.ComponentsCount > 0) {
-                var idx = 0;
-                while (entityData.ComponentsCount > 0 && idx < _poolsCount) {
-                    for (; idx < _poolsCount; idx++) {
-                        if (_pools[idx].Has (entity)) {
-                            _pools[idx++].Del (entity);
-                            break;
-                        }
-                    }
+            if (componentsCount > 0) {
+                for (var i = entityOffset + RawEntityOffsets.Components + componentsCount - 1; i >= entityOffset + RawEntityOffsets.Components; i--) {
+                    _pools[_entities[i]].Del (entity);
                 }
-#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-                if (entityData.ComponentsCount != 0) { throw new Exception ($"Invalid components count on entity {entity} => {entityData.ComponentsCount}."); }
-#endif
-                return;
-            }
-            entityData.Gen = (short) (entityData.Gen == short.MaxValue ? -1 : -(entityData.Gen + 1));
-            if (_recycledEntitiesCount == _recycledEntities.Length) {
-                Array.Resize (ref _recycledEntities, _recycledEntitiesCount << 1);
-            }
-            _recycledEntities[_recycledEntitiesCount++] = entity;
+            } else {
+                entityGen = (short) (entityGen == short.MaxValue ? -1 : -(entityGen + 1));
+                if (_recycledEntitiesCount == _recycledEntities.Length) {
+                    Array.Resize (ref _recycledEntities, _recycledEntitiesCount << 1);
+                }
+                _recycledEntities[_recycledEntitiesCount++] = entity;
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
-            for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
-                _eventListeners[ii].OnEntityDestroyed (entity);
-            }
+                for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
+                    _eventListeners[ii].OnEntityDestroyed (entity);
+                }
 #endif
+            }
+        }
+
+#if DEBUG
+        [Obsolete ("Use GetEntityComponentsCount() instead.")]
+#endif
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        public int GetComponentsCount (int entity) {
+            return GetEntityComponentsCount (entity);
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public int GetComponentsCount (int entity) {
-            return Entities[entity].ComponentsCount;
+        public int GetEntityComponentsCount (int entity) {
+            return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.ComponentsCount];
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public short GetEntityGen (int entity) {
-            return Entities[entity].Gen;
+            return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen];
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        public int GetRawEntityItemSize () {
+            return _entitiesItemSize;
+        }
+
+#if DEBUG
+        [Obsolete ("Use GetUsedEntitiesCount() instead.")]
+#endif
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetAllocatedEntitiesCount () {
+            return GetUsedEntitiesCount ();
+        }
+
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        public int GetUsedEntitiesCount () {
             return _entitiesCount;
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetWorldSize () {
-            return Entities.Length;
+            return _entities.Length / _entitiesItemSize;
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
@@ -238,8 +262,8 @@ namespace Leopotam.EcsLite {
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public EntityData[] GetRawEntities () {
-            return Entities;
+        public short[] GetRawEntities () {
+            return _entities;
         }
 
         public EcsPool<T> GetPool<T> () where T : struct {
@@ -247,7 +271,10 @@ namespace Leopotam.EcsLite {
             if (_poolHashes.TryGetValue (poolType, out var rawPool)) {
                 return (EcsPool<T>) rawPool;
             }
-            var pool = new EcsPool<T> (this, _poolsCount, _poolDenseSize, Entities.Length, _poolRecycledSize);
+#if DEBUG
+            if (_poolsCount == short.MaxValue) { throw new Exception ("No more room for new component into this world."); }
+#endif
+            var pool = new EcsPool<T> (this, _poolsCount, _poolDenseSize, GetWorldSize (), _poolRecycledSize);
             _poolHashes[poolType] = pool;
             if (_poolsCount == _pools.Length) {
                 var newSize = _poolsCount << 1;
@@ -275,10 +302,9 @@ namespace Leopotam.EcsLite {
                 entities = new int[count];
             }
             var id = 0;
-            for (int i = 0, iMax = _entitiesCount; i < iMax; i++) {
-                ref var entityData = ref Entities[i];
-                // should we skip empty entities here?
-                if (entityData.Gen > 0 && entityData.ComponentsCount >= 0) {
+            var offset = 0;
+            for (int i = 0, iMax = _entitiesCount; i < iMax; i++, offset += _entitiesItemSize) {
+                if (_entities[offset + RawEntityOffsets.Gen] > 0 && _entities[offset + RawEntityOffsets.ComponentsCount] >= 0) {
                     entities[id++] = i;
                 }
             }
@@ -301,43 +327,97 @@ namespace Leopotam.EcsLite {
         }
 
         public int GetComponents (int entity, ref object[] list) {
-            var itemsCount = Entities[entity].ComponentsCount;
+            var entityOffset = GetRawEntityOffset (entity);
+            var itemsCount = _entities[entityOffset + RawEntityOffsets.ComponentsCount];
             if (itemsCount == 0) { return 0; }
             if (list == null || list.Length < itemsCount) {
                 list = new object[_pools.Length];
             }
-            for (int i = 0, j = 0, iMax = _poolsCount; i < iMax; i++) {
-                if (_pools[i].Has (entity)) {
-                    list[j++] = _pools[i].GetRaw (entity);
-                }
+            var dataOffset = entityOffset + RawEntityOffsets.Components;
+            for (var i = 0; i < itemsCount; i++) {
+                list[i] = _pools[_entities[dataOffset + i]].GetRaw (entity);
             }
             return itemsCount;
         }
 
         public int GetComponentTypes (int entity, ref Type[] list) {
-            var itemsCount = Entities[entity].ComponentsCount;
+            var entityOffset = GetRawEntityOffset (entity);
+            var itemsCount = _entities[entityOffset + RawEntityOffsets.ComponentsCount];
             if (itemsCount == 0) { return 0; }
             if (list == null || list.Length < itemsCount) {
                 list = new Type[_pools.Length];
             }
-            for (int i = 0, j = 0, iMax = _poolsCount; i < iMax; i++) {
-                if (_pools[i].Has (entity)) {
-                    list[j++] = _pools[i].GetComponentType ();
-                }
+            var dataOffset = entityOffset + RawEntityOffsets.Components;
+            for (var i = 0; i < itemsCount; i++) {
+                list[i] = _pools[_entities[dataOffset + i]].GetComponentType ();
             }
             return itemsCount;
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         internal bool IsEntityAliveInternal (int entity) {
-            return entity >= 0 && entity < _entitiesCount && Entities[entity].Gen > 0;
+            return entity >= 0 && entity < _entitiesCount && _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen] > 0;
+        }
+
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        internal void AddComponentToRawEntityInternal (int entity, short poolId) {
+            var offset = GetRawEntityOffset (entity);
+            var dataCount = _entities[offset + RawEntityOffsets.ComponentsCount];
+            if (dataCount + RawEntityOffsets.Components == _entitiesItemSize) {
+                // resize entities.
+                ExtendEntitiesCache ();
+                offset = GetRawEntityOffset (entity);
+            }
+            _entities[offset + RawEntityOffsets.ComponentsCount]++;
+            _entities[offset + RawEntityOffsets.Components + dataCount] = poolId;
+        }
+
+        [MethodImpl (MethodImplOptions.AggressiveInlining)]
+        internal short RemoveComponentFromRawEntityInternal (int entity, short poolId) {
+            var offset = GetRawEntityOffset (entity);
+            var dataCount = _entities[offset + RawEntityOffsets.ComponentsCount];
+            dataCount--;
+            _entities[offset + RawEntityOffsets.ComponentsCount] = dataCount;
+            var dataOffset = offset + RawEntityOffsets.Components;
+            for (var i = 0; i <= dataCount; i++) {
+                if (_entities[dataOffset + i] == poolId) {
+                    if (i < dataCount) {
+                        // fill gap with last item.
+                        _entities[dataOffset + i] = _entities[dataOffset + dataCount];
+                    }
+                    return dataCount;
+                }
+            }
+#if DEBUG
+            throw new Exception ("Component not found in entity data");
+#else
+            return 0;
+#endif
+        }
+
+        void ExtendEntitiesCache () {
+            var newItemSize = RawEntityOffsets.Components + ((_entitiesItemSize - RawEntityOffsets.Components) << 1);
+            var newEntities = new short[GetWorldSize () * newItemSize];
+            var oldOffset = 0;
+            var newOffset = 0;
+            for (int i = 0, iMax = _entitiesCount; i < iMax; i++) {
+                // amount of entity data (components + header).
+                var entityDataLen = _entities[oldOffset + RawEntityOffsets.ComponentsCount] + RawEntityOffsets.Components;
+                for (var j = 0; j < entityDataLen; j++) {
+                    newEntities[newOffset + j] = _entities[oldOffset + j];
+                }
+                oldOffset += _entitiesItemSize;
+                newOffset += newItemSize;
+            }
+            _entitiesItemSize = newItemSize;
+            _entities = newEntities;
         }
 
         (EcsFilter, bool) GetFilterInternal (Mask mask, int capacity = 512) {
             var hash = mask.Hash;
             var exists = _hashedFilters.TryGetValue (hash, out var filter);
             if (exists) { return (filter, false); }
-            filter = new EcsFilter (this, mask, capacity, Entities.Length);
+            filter = new EcsFilter (this, mask, capacity, GetWorldSize ());
             _hashedFilters[hash] = filter;
             _allFilters.Add (filter);
             // add to component dictionaries for fast compatibility scan.
@@ -359,8 +439,7 @@ namespace Leopotam.EcsLite {
             }
             // scan exist entities for compatibility with new filter.
             for (int i = 0, iMax = _entitiesCount; i < iMax; i++) {
-                ref var entityData = ref Entities[i];
-                if (entityData.ComponentsCount > 0 && IsMaskCompatible (mask, i)) {
+                if (_entities[GetRawEntityOffset (i) + RawEntityOffsets.ComponentsCount] > 0 && IsMaskCompatible (mask, i)) {
                     filter.AddEntity (i);
                 }
             }
@@ -461,6 +540,7 @@ namespace Leopotam.EcsLite {
             public int Filters;
             public int PoolDenseSize;
             public int PoolRecycledSize;
+            public int EntityComponentsSize;
 
             internal const int EntitiesDefault = 512;
             internal const int RecycledEntitiesDefault = 512;
@@ -468,6 +548,7 @@ namespace Leopotam.EcsLite {
             internal const int FiltersDefault = 512;
             internal const int PoolDenseSizeDefault = 512;
             internal const int PoolRecycledSizeDefault = 512;
+            internal const int EntityComponentsSizeDefault = 8;
         }
 
 #if ENABLE_IL2CPP
@@ -560,11 +641,6 @@ namespace Leopotam.EcsLite {
                 }
                 _world._masks[_world._masksCount++] = this;
             }
-        }
-
-        public struct EntityData {
-            public short Gen;
-            public short ComponentsCount;
         }
     }
 
