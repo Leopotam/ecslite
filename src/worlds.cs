@@ -354,6 +354,17 @@ namespace Leopotam.EcsLite {
             return itemsCount;
         }
 
+        public void CopyEntity (int srcEntity, int dstEntity) {
+            var entityOffset = GetRawEntityOffset (srcEntity);
+            var itemsCount = _entities[entityOffset + RawEntityOffsets.ComponentsCount];
+            if (itemsCount > 0) {
+                var dataOffset = entityOffset + RawEntityOffsets.Components;
+                for (var i = 0; i < itemsCount; i++) {
+                    _pools[_entities[dataOffset + i]].Copy (srcEntity, dstEntity);
+                }
+            }
+        }
+
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         internal bool IsEntityAliveInternal (int entity) {
             return entity >= 0 && entity < _entitiesCount && _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen] > 0;

@@ -20,10 +20,15 @@ namespace Leopotam.EcsLite {
         void SetRaw (int entity, object dataRaw);
         int GetId ();
         Type GetComponentType ();
+        void Copy (int srcEntity, int dstEntity);
     }
 
     public interface IEcsAutoReset<T> where T : struct {
         void AutoReset (ref T c);
+    }
+
+    public interface IEcsAutoCopy<T> where T : struct {
+        void AutoCopy (ref T src, ref T dst);
     }
 
 #if ENABLE_IL2CPP
@@ -34,7 +39,8 @@ namespace Leopotam.EcsLite {
         readonly Type _type;
         readonly EcsWorld _world;
         readonly short _id;
-        readonly AutoResetHandler _autoReset;
+        readonly AutoResetHandler _autoResetHandler;
+        readonly AutoCopyHandler _autoCopyHandler;
         // 1-based index.
         T[] _denseItems;
         int[] _sparseItems;
@@ -42,7 +48,7 @@ namespace Leopotam.EcsLite {
         int[] _recycledItems;
         int _recycledItemsCount;
 #if ENABLE_IL2CPP && !UNITY_EDITOR
-        T _autoresetFakeInstance;
+        T _fakeInstance;
 #endif
 
         internal EcsPool (EcsWorld world, short id, int denseCapacity, int sparseCapacity, int recycledCapacity) {
@@ -54,6 +60,7 @@ namespace Leopotam.EcsLite {
             _denseItemsCount = 1;
             _recycledItems = new int[recycledCapacity];
             _recycledItemsCount = 0;
+            // autoreset init.
             var isAutoReset = typeof (IEcsAutoReset<T>).IsAssignableFrom (_type);
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
             if (!isAutoReset && _type.GetInterface ("IEcsAutoReset`1") != null) {
@@ -68,14 +75,38 @@ namespace Leopotam.EcsLite {
                         $"IEcsAutoReset<{typeof (T).Name}> explicit implementation not supported, use implicit instead.");
                 }
 #endif
-                _autoReset = (AutoResetHandler) Delegate.CreateDelegate (
+                _autoResetHandler = (AutoResetHandler) Delegate.CreateDelegate (
                     typeof (AutoResetHandler),
 #if ENABLE_IL2CPP && !UNITY_EDITOR
-                    _autoresetFakeInstance,
+                    _fakeInstance,
 #else
                     null,
 #endif
                     autoResetMethod);
+            }
+            // autocopy init.
+            var isAutoCopy = typeof (IEcsAutoCopy<T>).IsAssignableFrom (_type);
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (!isAutoCopy && _type.GetInterface ("IEcsCopy`1") != null) {
+                throw new Exception ($"IEcsCopy should have <{typeof (T).Name}> constraint for component \"{typeof (T).Name}\".");
+            }
+#endif
+            if (isAutoCopy) {
+                var copyMethod = typeof (T).GetMethod (nameof (IEcsAutoCopy<T>.AutoCopy));
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+                if (copyMethod == null) {
+                    throw new Exception (
+                        $"IEcsCopy<{typeof (T).Name}> explicit implementation not supported, use implicit instead.");
+                }
+#endif
+                _autoCopyHandler = (AutoCopyHandler) Delegate.CreateDelegate (
+                    typeof (AutoCopyHandler),
+#if ENABLE_IL2CPP && !UNITY_EDITOR
+                    _fakeInstance,
+#else
+                    null,
+#endif
+                    copyMethod);
             }
         }
 
@@ -160,7 +191,7 @@ namespace Leopotam.EcsLite {
                     Array.Resize (ref _denseItems, _denseItemsCount << 1);
                 }
                 _denseItemsCount++;
-                _autoReset?.Invoke (ref _denseItems[idx]);
+                _autoResetHandler?.Invoke (ref _denseItems[idx]);
             }
             _sparseItems[entity] = idx;
             _world.OnEntityChangeInternal (entity, _id, true);
@@ -199,8 +230,8 @@ namespace Leopotam.EcsLite {
                     Array.Resize (ref _recycledItems, _recycledItemsCount << 1);
                 }
                 _recycledItems[_recycledItemsCount++] = sparseData;
-                if (_autoReset != null) {
-                    _autoReset.Invoke (ref _denseItems[sparseData]);
+                if (_autoResetHandler != null) {
+                    _autoResetHandler.Invoke (ref _denseItems[sparseData]);
                 } else {
                     _denseItems[sparseData] = default;
                 }
@@ -215,6 +246,27 @@ namespace Leopotam.EcsLite {
             }
         }
 
+        public void Copy (int srcEntity, int dstEntity) {
+#if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
+            if (!_world.IsEntityAliveInternal (srcEntity)) { throw new Exception ("Cant touch destroyed src-entity."); }
+            if (!_world.IsEntityAliveInternal (dstEntity)) { throw new Exception ("Cant touch destroyed dest-entity."); }
+#endif
+            if (Has (srcEntity)) {
+                ref var srcData = ref Get (srcEntity);
+                if (!Has (dstEntity)) {
+                    Add (dstEntity) = srcData;
+                }
+                ref var dstData = ref Get (dstEntity);
+                if (_autoCopyHandler != null) {
+                    _autoCopyHandler.Invoke (ref srcData, ref dstData);
+                } else {
+                    dstData = srcData;
+                }
+            }
+        }
+
         delegate void AutoResetHandler (ref T component);
+
+        delegate void AutoCopyHandler (ref T srcComponent, ref T dstComponent);
     }
 }
