@@ -209,18 +209,18 @@ namespace Leopotam.EcsLite {
 #endif
             }
         }
-
-#if DEBUG
-        [Obsolete ("Use GetEntityComponentsCount() instead.")]
-#endif
+        
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetComponentsCount (int entity) {
-            return GetEntityComponentsCount (entity);
+            return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.ComponentsCount];
         }
 
+#if DEBUG
+        [Obsolete ("Use GetComponentsCount() instead. Assumption was wrong, sorry for that.")]
+#endif
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetEntityComponentsCount (int entity) {
-            return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.ComponentsCount];
+            return GetComponentsCount (entity);
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
@@ -231,14 +231,6 @@ namespace Leopotam.EcsLite {
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetRawEntityItemSize () {
             return _entitiesItemSize;
-        }
-
-#if DEBUG
-        [Obsolete ("Use GetUsedEntitiesCount() instead.")]
-#endif
-        [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public int GetAllocatedEntitiesCount () {
-            return GetUsedEntitiesCount ();
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
