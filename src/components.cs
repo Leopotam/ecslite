@@ -254,7 +254,7 @@ namespace Leopotam.EcsLite {
             if (Has (srcEntity)) {
                 ref var srcData = ref Get (srcEntity);
                 if (!Has (dstEntity)) {
-                    Add (dstEntity) = srcData;
+                    Add (dstEntity);
                 }
                 ref var dstData = ref Get (dstEntity);
                 if (_autoCopyHandler != null) {
