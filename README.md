@@ -383,11 +383,11 @@ void FixedUpdate () {
 ```c#
 struct MyComponent : IEcsAutoReset<MyComponent> {
     public int Id;
-    public object LinkToAnotherComponent;
+    public object SomeExternalData;
 
     public void AutoReset (ref MyComponent c) {
         c.Id = 2;
-        c.LinkToAnotherComponent = null;
+        c.SomeExternalData = null;
     }
 }
 ```
