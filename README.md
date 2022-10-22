@@ -144,7 +144,7 @@ ref Component1 c1 = ref pool.Get (entity);
 pool.Del (entity);
 
 // Copy() выполняет копирование всех компонентов с одной сущности на другую. Если исходная или целевая сущность не существует - будет брошено исключение в DEBUG-версии.
-pool.Get (srcEntity, dstEntity);
+pool.Copy (srcEntity, dstEntity);
 
 ```
 
@@ -383,11 +383,11 @@ void FixedUpdate () {
 ```c#
 struct MyComponent : IEcsAutoReset<MyComponent> {
     public int Id;
-    public object LinkToAnotherComponent;
+    public object SomeExternalData;
 
     public void AutoReset (ref MyComponent c) {
         c.Id = 2;
-        c.LinkToAnotherComponent = null;
+        c.SomeExternalData = null;
     }
 }
 ```
