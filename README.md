@@ -329,7 +329,6 @@ class EcsStartup {
 * [Multiple Shared injection](https://github.com/GoodCatGames/ecslite-multiple-shared)
 * [EasyEvents](https://github.com/7Bpencil/ecslite-easyevents)
 * [Entity command buffer](https://github.com/JimboA/EcsLiteEntityCommandBuffer)
-* [Интеграция в редактор Unity на базе UIToolkit](https://github.com/Mitfart/LeoECSLite.UnityIntegration)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
