@@ -186,6 +186,7 @@ namespace Leopotam.EcsLite {
             _worlds.Clear ();
             _allSystems.Clear ();
             _runSystems.Clear ();
+            _postRunSystems.Clear ();
 #if DEBUG
             _inited = false;
 #endif

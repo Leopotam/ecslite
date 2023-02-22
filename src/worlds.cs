@@ -215,14 +215,6 @@ namespace Leopotam.EcsLite {
             return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.ComponentsCount];
         }
 
-#if DEBUG
-        [Obsolete ("Use GetComponentsCount() instead. Assumption was wrong, sorry for that.")]
-#endif
-        [MethodImpl (MethodImplOptions.AggressiveInlining)]
-        public int GetEntityComponentsCount (int entity) {
-            return GetComponentsCount (entity);
-        }
-
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public short GetEntityGen (int entity) {
             return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.Gen];
