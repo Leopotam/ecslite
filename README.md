@@ -32,7 +32,7 @@
 * [ЧаВо](#ЧаВо)
 
 # Социальные ресурсы
-[![discord](https://img.shields.io/discord/404358247621853185.svg?label=enter%20to%20discord%20server&style=for-the-badge&logo=discord)](https://discord.gg/5GZVde6)
+[![discord](https://img.shields.io/discord/404358247621853185.svg?label=enter%20to%20discord%20server&style=for-the-badge&logo=discord)](https://discord.gg/UQjdcbcHSf)
 
 # Установка
 
