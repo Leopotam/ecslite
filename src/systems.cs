@@ -60,7 +60,7 @@ namespace Leopotam.EcsLite {
         readonly List<IEcsPostRunSystem> _postRunSystems;
         readonly object _shared;
 #if DEBUG
-        bool _inited;
+        protected bool _inited;
 #endif
 
         public EcsSystems (EcsWorld defaultWorld, object shared = null) {
