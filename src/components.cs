@@ -143,7 +143,7 @@ namespace Leopotam.EcsLite {
 
         void IEcsPool.SetRaw (int entity, object dataRaw) {
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-            if (dataRaw == null || dataRaw.GetType () != _type) { throw new Exception ("Invalid component data, valid \"{typeof (T).Name}\" instance required."); }
+            if (dataRaw == null || dataRaw.GetType () != _type) { throw new Exception ($"Invalid component data, valid \"{typeof (T).Name}\" instance required."); }
             if (_sparseItems[entity] <= 0) { throw new Exception ($"Component \"{typeof (T).Name}\" not attached to entity."); }
 #endif
             _denseItems[_sparseItems[entity]] = (T) dataRaw;
@@ -151,7 +151,7 @@ namespace Leopotam.EcsLite {
 
         void IEcsPool.AddRaw (int entity, object dataRaw) {
 #if DEBUG && !LEOECSLITE_NO_SANITIZE_CHECKS
-            if (dataRaw == null || dataRaw.GetType () != _type) { throw new Exception ("Invalid component data, valid \"{typeof (T).Name}\" instance required."); }
+            if (dataRaw == null || dataRaw.GetType () != _type) { throw new Exception ($"Invalid component data, valid \"{typeof (T).Name}\" instance required."); }
 #endif
             ref var data = ref Add (entity);
             data = (T) dataRaw;
