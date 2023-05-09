@@ -346,6 +346,7 @@ class EcsStartup {
 * [Интеграция в редактор Unity на базе UIToolkit](https://github.com/Mitfart/LeoECSLite.UnityIntegration)
 * [Unity Entity Converter](https://github.com/AndreyBirchenko/LeoEcsLiteEntityConverter)
 * [Interval Systems](https://github.com/nenuacho/ecslite-interval-systems)
+* [Quadtree Systems](https://github.com/nenuacho/ecslite-quadtree)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
