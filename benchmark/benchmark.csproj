@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <DefineConstants>LEOECSLITE_FILTER_EVENTS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="Cistern.ValueLinq" Version="0.1.14" />
+    <PackageReference Include="CodegenAnalysis.Benchmarks" Version="0.0.9-alpha" />
+    <PackageReference Include="NetFabric.Hyperlinq" Version="3.0.0-beta48" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\src.csproj" />
+  </ItemGroup>
+
+</Project>
