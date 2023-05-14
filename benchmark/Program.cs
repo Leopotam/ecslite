@@ -42,7 +42,7 @@ public class Program
         s.Destroy();
     }
 
-    internal class AllEntityComponentSwitcherSystem1 : IEcsSystem, IEcsRunSystem
+    internal class AllEntityComponentSwitcherSystem1 : IEcsSystem
     {
         public void Run(IEcsSystems systems)
         {
@@ -59,7 +59,7 @@ public class Program
         }
     }
 
-    internal class AllEntityComponentSwitcherSystem2 : IEcsSystem, IEcsRunSystem
+    internal class AllEntityComponentSwitcherSystem2 : IEcsSystem
     {
         public void Run(IEcsSystems systems)
         {
