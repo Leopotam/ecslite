@@ -164,30 +164,31 @@ pool.Copy (srcEntity, dstEntity);
 Является контейнером для хранения отфильтрованных сущностей по наличию или отсутствию определенных компонентов:
 ```c#
 class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
+    EcsFilter _filter;
+    EcsPool<Weapon> _weapons;
+    
     public void Init (IEcsSystems systems) {
         // Получаем экземпляр мира по умолчанию.
         EcsWorld world = systems.GetWorld ();
         
-        // Создаем новую сущность.
+        // Мы хотим получить все сущности с компонентом "Weapon" и без компонента "Health".
+        // Фильтр хранит только сущности, сами даные лежат в пуле компонентов "Weapon".
+        // Фильтр может собираться динамически каждый раз, но рекомендуется кеширование.
+        _filter = world.Filter<Weapon> ().Exc<Health> ().End ();
+        
+        // Запросим и закешируем пул компонентов "Weapon".
+        _weapons = world.GetPool<Weapon> ();
+        
+        // Создаем новую сущность для теста.
         int entity = world.NewEntity ();
         
-        // И добавляем к ней компонент "Weapon".
-        var weapons = world.GetPool<Weapon>();
-        weapons.Add (entity);
+        // И добавляем к ней компонент "Weapon" - эта сущность должна попасть в фильтр.
+        _weapons.Add (entity);
     }
 
     public void Run (IEcsSystems systems) {
-        EcsWorld world = systems.GetWorld ();
-        // Мы хотим получить все сущности с компонентом "Weapon" и без компонента "Health".
-        // Фильтр может собираться динамически каждый раз, а может быть закеширован где-то.
-        var filter = world.Filter<Weapon> ().Exc<Health> ().End ();
-        
-        // Фильтр хранит только сущности, сами даные лежат в пуле компонентов "Weapon".
-        // Пул так же может быть закеширован где-то.
-        var weapons = world.GetPool<Weapon>();
-        
         foreach (int entity in filter) {
-            ref Weapon weapon = ref weapons.Get (entity);
+            ref Weapon weapon = ref _weapons.Get (entity);
             weapon.Ammo = System.Math.Max (0, weapon.Ammo - 1);
         }
     }
