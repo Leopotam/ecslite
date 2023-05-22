@@ -164,30 +164,31 @@ pool.Copy (srcEntity, dstEntity);
 Является контейнером для хранения отфильтрованных сущностей по наличию или отсутствию определенных компонентов:
 ```c#
 class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
+    EcsFilter _filter;
+    EcsPool<Weapon> _weapons;
+    
     public void Init (IEcsSystems systems) {
         // Получаем экземпляр мира по умолчанию.
         EcsWorld world = systems.GetWorld ();
         
-        // Создаем новую сущность.
+        // Мы хотим получить все сущности с компонентом "Weapon" и без компонента "Health".
+        // Фильтр хранит только сущности, сами даные лежат в пуле компонентов "Weapon".
+        // Фильтр может собираться динамически каждый раз, но рекомендуется кеширование.
+        _filter = world.Filter<Weapon> ().Exc<Health> ().End ();
+        
+        // Запросим и закешируем пул компонентов "Weapon".
+        _weapons = world.GetPool<Weapon> ();
+        
+        // Создаем новую сущность для теста.
         int entity = world.NewEntity ();
         
-        // И добавляем к ней компонент "Weapon".
-        var weapons = world.GetPool<Weapon>();
-        weapons.Add (entity);
+        // И добавляем к ней компонент "Weapon" - эта сущность должна попасть в фильтр.
+        _weapons.Add (entity);
     }
 
     public void Run (IEcsSystems systems) {
-        EcsWorld world = systems.GetWorld ();
-        // Мы хотим получить все сущности с компонентом "Weapon" и без компонента "Health".
-        // Фильтр может собираться динамически каждый раз, а может быть закеширован где-то.
-        var filter = world.Filter<Weapon> ().Exc<Health> ().End ();
-        
-        // Фильтр хранит только сущности, сами даные лежат в пуле компонентов "Weapon".
-        // Пул так же может быть закеширован где-то.
-        var weapons = world.GetPool<Weapon>();
-        
         foreach (int entity in filter) {
-            ref Weapon weapon = ref weapons.Get (entity);
+            ref Weapon weapon = ref _weapons.Get (entity);
             weapon.Ammo = System.Math.Max (0, weapon.Ammo - 1);
         }
     }
@@ -296,20 +297,6 @@ class EcsStartup {
 }
 ```
 
-# Статьи
-
-* ["Создание dungeon crawler'а с LeoECS Lite. Часть 1"](https://habr.com/ru/post/661085/)
-
-  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/372/b1c/ad3/372b1cad308788dac56f8db1ea16b9c9.png)](https://habr.com/ru/post/661085/)
-
-* ["Создание dungeon crawler'а с LeoECS Lite. Часть 2"](https://habr.com/ru/post/673926/)
-
-  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/63f/3ef/c47/63f3efc473664fdaaf1a249f258e2486.png)](https://habr.com/ru/post/673926/)
-
-* ["Всё что нужно знать про ECS"](https://habr.com/ru/post/665276/)
-
-  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/3fd/5bc/544/3fd5bc5442b03a20d52a8003576056d4.png)](https://habr.com/ru/post/665276/)
-
 # Проекты, использующие LeoECS Lite
 ## С исходниками
 
@@ -344,7 +331,9 @@ class EcsStartup {
 * [EasyEvents](https://github.com/7Bpencil/ecslite-easyevents)
 * [Entity command buffer](https://github.com/JimboA/EcsLiteEntityCommandBuffer)
 * [Интеграция в редактор Unity на базе UIToolkit](https://github.com/Mitfart/LeoECSLite.UnityIntegration)
-* [Unity Entity Converter (замена UniLeo)](https://github.com/AndreyBirchenko/LeoEcsLiteEntityConverter)
+* [Unity Entity Converter](https://github.com/AndreyBirchenko/LeoEcsLiteEntityConverter)
+* [Interval Systems](https://github.com/nenuacho/ecslite-interval-systems)
+* [Quadtree Systems](https://github.com/nenuacho/ecslite-quadtree)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
