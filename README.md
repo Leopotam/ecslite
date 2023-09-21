@@ -351,6 +351,7 @@ class EcsStartup {
 * [Unity Entity Converter](https://github.com/AndreyBirchenko/LeoEcsLiteEntityConverter)
 * [Interval Systems](https://github.com/nenuacho/ecslite-interval-systems)
 * [Quadtree Systems](https://github.com/nenuacho/ecslite-quadtree)
+* [LeoECS Lite Unity Zoo](https://github.com/aleverdes/leoecslite-zoo)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
