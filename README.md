@@ -24,8 +24,10 @@
 * [Интеграция с движками](#Интеграция-с-движками)
     * [Unity](#Unity)
     * [Кастомный движок](#Кастомный-движок)
-* [Проекты, использующие LeoECS Lite](#Проекты-использующие-LeoECS-Lite)
+* [Статьи](#Статьи)
+* [Проекты на LeoECS Lite](#Проекты-на-LeoECS-Lite)
     * [С исходниками](#С-исходниками)
+    * [Без исходников](#Без-исходников)
 * [Расширения](#Расширения)
 * [Лицензия](#Лицензия)
 * [ЧаВо](#ЧаВо)
@@ -298,7 +300,17 @@ class EcsStartup {
 }
 ```
 
-# Проекты, использующие LeoECS Lite
+# Статьи
+
+* ["Создание dungeon crawler'а с LeoECS Lite. Часть 1"](https://habr.com/ru/post/661085/)
+
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/372/b1c/ad3/372b1cad308788dac56f8db1ea16b9c9.png)](https://habr.com/ru/post/661085/)
+
+* ["Создание dungeon crawler'а с LeoECS Lite. Часть 2"](https://habr.com/ru/post/673926/)
+
+  [![](https://habrastorage.org/r/w1560/getpro/habr/upload_files/63f/3ef/c47/63f3efc473664fdaaf1a249f258e2486.png)](https://habr.com/ru/post/673926/)
+
+# Проекты на LeoECS Lite
 ## С исходниками
 
 * ["SlimeHunter"](https://github.com/JimboA/SlimeHunter-LeoEcsLite)
@@ -316,8 +328,12 @@ class EcsStartup {
   [![](https://github.com/7Bpencil/sharpPhysics/raw/master/pictures/preview.png)](https://github.com/7Bpencil/sharpPhysics)
 
 ## Без исходников
+* ["Супер Био-Мужик" (STEAM)](https://store.steampowered.com/app/2144580/Super_BioMan/)
 
-* [Microbiome (WIP)](https://vk.com/microbiomegame)
+  [![](https://cdn.akamai.steamstatic.com/steam/apps/2144580/header.jpg)](https://cdn.akamai.steamstatic.com/steam/apps/2144580/header.jpg)
+
+
+* ["Microbiome" (WIP)](https://vk.com/microbiomegame)
 
   [![](https://img.youtube.com/vi/WTciasBN2eQ/0.jpg)](https://www.youtube.com/watch?v=WTciasBN2eQ)
 
@@ -335,6 +351,8 @@ class EcsStartup {
 * [Unity Entity Converter](https://github.com/AndreyBirchenko/LeoEcsLiteEntityConverter)
 * [Interval Systems](https://github.com/nenuacho/ecslite-interval-systems)
 * [Quadtree Systems](https://github.com/nenuacho/ecslite-quadtree)
+* [LeoECS Lite Unity Zoo](https://github.com/aleverdes/leoecslite-zoo)
+* [Adding/removing components debugger for LeoECS Lite](https://github.com/supremestranger/LiteEzDebuggerModule)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).

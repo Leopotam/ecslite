@@ -59,9 +59,9 @@ namespace Leopotam.EcsLite {
             _eventListeners.Remove (listener);
         }
 
-        public void RaiseEntityChangeEvent (int entity) {
+        public void RaiseEntityChangeEvent (int entity, short poolId, bool added) {
             for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
-                _eventListeners[ii].OnEntityChanged (entity);
+                _eventListeners[ii].OnEntityChanged (entity, poolId, added);
             }
         }
 #endif
@@ -209,7 +209,7 @@ namespace Leopotam.EcsLite {
 #endif
             }
         }
-        
+
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public int GetComponentsCount (int entity) {
             return _entities[GetRawEntityOffset (entity) + RawEntityOffsets.ComponentsCount];
@@ -446,7 +446,7 @@ namespace Leopotam.EcsLite {
             return (filter, true);
         }
 
-        public void OnEntityChangeInternal (int entity, int componentType, bool added) {
+        public void OnEntityChangeInternal (int entity, short componentType, bool added) {
             var includeList = _filtersByIncludedComponents[componentType];
             var excludeList = _filtersByExcludedComponents[componentType];
             if (added) {
@@ -642,7 +642,7 @@ namespace Leopotam.EcsLite {
 #if DEBUG || LEOECSLITE_WORLD_EVENTS
     public interface IEcsWorldEventListener {
         void OnEntityCreated (int entity);
-        void OnEntityChanged (int entity);
+        void OnEntityChanged (int entity, short poolId, bool added);
         void OnEntityDestroyed (int entity);
         void OnFilterCreated (EcsFilter filter);
         void OnWorldResized (int newSize);
