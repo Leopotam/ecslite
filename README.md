@@ -352,6 +352,7 @@ class EcsStartup {
 * [Interval Systems](https://github.com/nenuacho/ecslite-interval-systems)
 * [Quadtree Systems](https://github.com/nenuacho/ecslite-quadtree)
 * [LeoECS Lite Unity Zoo](https://github.com/aleverdes/leoecslite-zoo)
+* [Adding/removing components debugger for LeoECS Lite](https://github.com/supremestranger/LiteEzDebuggerModule)
 
 # Лицензия
 Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
