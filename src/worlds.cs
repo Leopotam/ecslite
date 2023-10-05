@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 #if ENABLE_IL2CPP
@@ -259,14 +260,8 @@ namespace Leopotam.EcsLite {
             if (_poolsCount == short.MaxValue) { throw new Exception ("No more room for new component into this world."); }
 #endif
             var pool = new EcsPool<T> (this, _poolsCount, _poolDenseSize, GetWorldSize (), _poolRecycledSize);
-            _poolHashes[poolType] = pool;
-            if (_poolsCount == _pools.Length) {
-                var newSize = _poolsCount << 1;
-                Array.Resize (ref _pools, newSize);
-                Array.Resize (ref _filtersByIncludedComponents, newSize);
-                Array.Resize (ref _filtersByExcludedComponents, newSize);
-            }
-            _pools[_poolsCount++] = pool;
+            OnPoolCreated (poolType, pool);
+
             return pool;
         }
 
@@ -277,7 +272,36 @@ namespace Leopotam.EcsLite {
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
         public IEcsPool GetPoolByType (Type type) {
-            return _poolHashes.TryGetValue (type, out var pool) ? pool : null;
+            if (_poolHashes.TryGetValue (type, out var rawPool)) {
+                return rawPool;
+            }
+
+#if DEBUG
+            if (_poolsCount == short.MaxValue) { throw new Exception ("No more room for new component into this world."); }
+#endif
+
+            rawPool = (IEcsPool) Activator.CreateInstance(
+                type: typeof(EcsPool<>).MakeGenericType(type),
+                bindingAttr: BindingFlags.NonPublic | BindingFlags.Instance,
+                args: new object[] { this, _poolsCount, _poolDenseSize, GetWorldSize (), _poolRecycledSize },
+                binder: null, culture: null);
+
+            OnPoolCreated (type, rawPool);
+
+            return rawPool;
+        }
+
+        void OnPoolCreated(Type type, IEcsPool pool)
+        {
+            _poolHashes[type] = pool;
+            if (_poolsCount == _pools.Length) {
+                var newSize = _poolsCount << 1;
+                Array.Resize (ref _pools, newSize);
+                Array.Resize (ref _filtersByIncludedComponents, newSize);
+                Array.Resize (ref _filtersByExcludedComponents, newSize);
+            }
+
+            _pools[_poolsCount++] = pool;
         }
 
         public int GetAllEntities (ref int[] entities) {
