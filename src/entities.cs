@@ -11,14 +11,26 @@ using Unity.IL2CPP.CompilerServices;
 
 namespace Leopotam.EcsLite {
     public struct EcsPackedEntity {
-        internal int Id;
-        internal int Gen;
+        public int Id;
+        public int Gen;
+
+        public override int GetHashCode () {
+            unchecked {
+                return (23 * 31 + Id) * 31 + Gen;
+            }
+        }
     }
 
     public struct EcsPackedEntityWithWorld {
-        internal int Id;
-        internal int Gen;
-        internal EcsWorld World;
+        public int Id;
+        public int Gen;
+        public EcsWorld World;
+
+        public override int GetHashCode () {
+            unchecked {
+                return ((23 * 31 + Id) * 31 + Gen) * 31 + (World?.GetHashCode () ?? 0);
+            }
+        }
 #if DEBUG
         // For using in IDE debugger.
         internal object[] DebugComponentsView {
