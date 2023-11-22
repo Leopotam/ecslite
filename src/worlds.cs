@@ -616,12 +616,14 @@ namespace Leopotam.EcsLite {
                 Array.Sort (Include, 0, IncludeCount);
                 Array.Sort (Exclude, 0, ExcludeCount);
                 // calculate hash.
-                Hash = IncludeCount + ExcludeCount;
-                for (int i = 0, iMax = IncludeCount; i < iMax; i++) {
-                    Hash = unchecked (Hash * 314159 + Include[i]);
-                }
-                for (int i = 0, iMax = ExcludeCount; i < iMax; i++) {
-                    Hash = unchecked (Hash * 314159 - Exclude[i]);
+                unchecked {
+                    Hash = IncludeCount + ExcludeCount;
+                    for (int i = 0, iMax = IncludeCount; i < iMax; i++) {
+                        Hash = Hash * 314159 + Include[i];
+                    }
+                    for (int i = 0, iMax = ExcludeCount; i < iMax; i++) {
+                        Hash = Hash * 314159 - Exclude[i];
+                    }
                 }
                 var (filter, isNew) = _world.GetFilterInternal (this, capacity);
                 if (!isNew) { Recycle (); }
