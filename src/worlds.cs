@@ -187,7 +187,7 @@ namespace Leopotam.EcsLite {
             if (entity < 0 || entity >= _entitiesCount) { throw new Exception ("Cant touch destroyed entity."); }
 #endif
             var entityOffset = GetRawEntityOffset (entity);
-            var componentsCount = _entities[entityOffset + RawEntityOffsets.ComponentsCount];
+            ref var componentsCount = ref _entities[entityOffset + RawEntityOffsets.ComponentsCount];
             ref var entityGen = ref _entities[entityOffset + RawEntityOffsets.Gen];
             if (entityGen < 0) {
                 return;
@@ -196,18 +196,20 @@ namespace Leopotam.EcsLite {
                 for (var i = entityOffset + RawEntityOffsets.Components + componentsCount - 1; i >= entityOffset + RawEntityOffsets.Components; i--) {
                     _pools[_entities[i]].Del (entity);
                 }
-            } else {
-                entityGen = (short) (entityGen == short.MaxValue ? -1 : -(entityGen + 1));
-                if (_recycledEntitiesCount == _recycledEntities.Length) {
-                    Array.Resize (ref _recycledEntities, _recycledEntitiesCount << 1);
-                }
-                _recycledEntities[_recycledEntitiesCount++] = entity;
-#if DEBUG || LEOECSLITE_WORLD_EVENTS
-                for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
-                    _eventListeners[ii].OnEntityDestroyed (entity);
-                }
-#endif
+                componentsCount = 0;
+            } 
+                
+            entityGen = (short) (entityGen == short.MaxValue ? -1 : -(entityGen + 1));
+            if (_recycledEntitiesCount == _recycledEntities.Length) {
+                Array.Resize (ref _recycledEntities, _recycledEntitiesCount << 1);
             }
+            _recycledEntities[_recycledEntitiesCount++] = entity;
+#if DEBUG || LEOECSLITE_WORLD_EVENTS
+            for (int ii = 0, iMax = _eventListeners.Count; ii < iMax; ii++) {
+                _eventListeners[ii].OnEntityDestroyed (entity);
+            }
+#endif
+            
         }
 
         [MethodImpl (MethodImplOptions.AggressiveInlining)]
