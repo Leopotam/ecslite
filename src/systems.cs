@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
-// The Proprietary or MIT-Red License
-// Copyright (c) 2012-2023 Leopotam <leopotam@yandex.ru>
+// The MIT-Red License
+// Copyright (c) 2012-2024 Leopotam <leopotam@yandex.ru>
 // ----------------------------------------------------------------------------
 
 using System.Collections.Generic;
