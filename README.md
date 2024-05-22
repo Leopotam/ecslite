@@ -1,6 +1,8 @@
 # LeoEcsLite - Легковесный C# Entity Component System фреймворк
 Производительность, нулевые или минимальные аллокации, минимизация использования памяти, отсутствие зависимостей от любого игрового движка - это основные цели данного фреймворка.
 
+> **ВАЖНО!** АКТИВНАЯ РАЗРАБОТКА ПРЕКРАЩЕНА, ВОЗМОЖНО ТОЛЬКО ИСПРАВЛЕНИЕ ОБНАРУЖЕННЫХ ОШИБОК. СОСТОЯНИЕ СТАБИЛЬНОЕ, ИЗВЕСТНЫХ ОШИБОК НЕ ОБНАРУЖЕНО. ЗА НОВЫМ ПОКОЛЕНИЕМ ФРЕЙМВОРКА СТОИТ СЛЕДИТЬ В БЛОГЕ https://leopotam.com/
+
 > **ВАЖНО!** Не забывайте использовать `DEBUG`-версии билдов для разработки и `RELEASE`-версии билдов для релизов: все внутренние проверки/исключения будут работать только в `DEBUG`-версиях и удалены для увеличения производительности в `RELEASE`-версиях.
 
 > **ВАЖНО!** LeoEcsLite-фрейморк **не потокобезопасен** и никогда не будет таким! Если вам нужна многопоточность - вы должны реализовать ее самостоятельно и интегрировать синхронизацию в виде ecs-системы.
@@ -33,7 +35,7 @@
 * [ЧаВо](#ЧаВо)
 
 # Социальные ресурсы
-[![discord](https://img.shields.io/discord/404358247621853185.svg?label=enter%20to%20discord%20server&style=for-the-badge&logo=discord)](https://discord.gg/UQjdcbcHSf)
+[Блог разработчика](https://leopotam.com/)
 
 # Установка
 
@@ -333,7 +335,7 @@ class EcsStartup {
   [![](https://cdn.akamai.steamstatic.com/steam/apps/2144580/header.jpg)](https://cdn.akamai.steamstatic.com/steam/apps/2144580/header.jpg)
 
 
-* ["Microbiome" (WIP)](https://vk.com/microbiomegame)
+* ["Microbiome" (Перенесен на LeoECS Proto)](https://vk.com/microbiomegame)
 
   [![](https://img.youtube.com/vi/WTciasBN2eQ/0.jpg)](https://www.youtube.com/watch?v=WTciasBN2eQ)
 
@@ -355,7 +357,7 @@ class EcsStartup {
 * [Adding/removing components debugger for LeoECS Lite](https://github.com/supremestranger/LiteEzDebuggerModule)
 
 # Лицензия
-Фреймворк выпускается под двумя лицензиями, [подробности тут](./LICENSE.md).
+Пакет выпускается под [MIT-Red лицензией](./LICENSE.md).
 
 В случаях лицензирования по условиям MIT-Red не стоит расчитывать на
 персональные консультации или какие-либо гарантии.
@@ -517,4 +519,4 @@ var world = new EcsWorld ();
 var filter = world.Filter<C1> ().End ();
 var listener = new TestFilterEventListener ();
 filter.AddEventListener (listener);
-``` 
+```
