@@ -1,4 +1,4 @@
-Copyright (c) 2012-2025 leopotam@yandex.ru
+Copyright (c) 2012-2026 leopotam@yandex.ru
 
 Данное программное обеспечение и сопутствующая документация (далее - Продукт)
 выпускается под MIT-Red лицензией.
